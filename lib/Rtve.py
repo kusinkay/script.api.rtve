@@ -1,6 +1,6 @@
 from enum import Enum
 import json
-import xbmc 
+import xbmc, xbmcplugin
 from utils import getHtml, buildUrl
 from xbmcgui import ListItem
 
@@ -9,7 +9,7 @@ class Rtve:
 	
 	def __init__(self, media, base_url):
 		self.endpoint = 'http://www.rtve.es/api/'
-		self.size=60 #is the max allowed by api.rtve.es
+		self.size=20 #60 is the max allowed by api.rtve.es
 		self.page=1
 		self.media = media
 		self.debug = True
@@ -60,6 +60,8 @@ class Rtve:
 		return result
 	
 	def get_audios(self, args):
+		url_options          = ')ung-xunil(02%4.91.1F2%tegW=tnegA-resU|'[::-1]
+
 		result = []
 		url = args['branch'].value
 		if args['id']!=None:
@@ -72,6 +74,10 @@ class Rtve:
 			url += args['ranking'].value
 		source = self._get_content(url)
 		for item in source['items']:
+			audio = item.get('qualities', [])[0].get('filePath')
+			audio = audio.replace('://mvod.lvlt.', '://www.')
+			audio = audio + url_options
+			
 			li = ListItem()
 			li.setLabel(item.get('longTitle', None))
 			li.setArt({
@@ -87,8 +93,8 @@ class Rtve:
 					'language': item.get('language'),
 					'codec': item.get('qualities', [])[0].get('type')
 				})
-			
-			n  = Node(li, item.get('qualities', [])[0].get('filePath'))
+			li.setProperty('IsPlayable', 'true')
+			n = Node(li, self._build_url({'action': 'play','stream': audio}))
 			result.append(n)
 		args = {'action': args['action'], 'arg_id': args['id']}
 		self._add_pager(result, args, source['page'])
