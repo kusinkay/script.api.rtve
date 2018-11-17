@@ -1,4 +1,3 @@
-from enum import Enum
 import json
 import xbmc, xbmcplugin
 from utils import getHtml, buildUrl
@@ -23,7 +22,7 @@ class Rtve:
 	def get_channels(self, media=None):
 		if media==None:
 			media=self.media
-		url = 'medios/' + str(media.value) + '/cadenas.json'
+		url = 'medios/' + str(media) + '/cadenas.json'
 		result = []
 		source = self._get_content(url)['items']
 		for item in source:
@@ -54,7 +53,7 @@ class Rtve:
 	            })
 			n  = Node(li, self._build_url({'action': 'program','arg_id': item.get('id', None)}))
 			result.append(n)
-		args = {'action': Branch.PROGRAMS.value, 'arg_id': channel}
+		args = {'action': Branch.PROGRAMS, 'arg_id': channel}
 		self._add_pager(result, args, source['page'])
 			
 		return result
@@ -63,7 +62,7 @@ class Rtve:
 		url_options          = ')ung-xunil(02%4.91.1F2%tegW=tnegA-resU|'[::-1]
 
 		result = []
-		url = args['branch'].value
+		url = args['branch']
 		if args['id']!=None:
 			url += '/' + args['id']
 		if args['ranking']!=Ranking.RECENT:
@@ -71,7 +70,7 @@ class Rtve:
 		else:
 			url += '/'
 		if args['ranking']!=None:
-			url += args['ranking'].value
+			url += args['ranking']
 		source = self._get_content(url)
 		for item in source['items']:
 			audio = item.get('qualities', [])[0].get('filePath')
@@ -177,16 +176,16 @@ class Node:
 		self.listItem = li
 		self.url = url
 
-class Media(Enum):
+class Media():
 	TV = 850
 	RADIO = 851
 	WEB = 414
 
-class Branch(Enum):
+class Branch():
 	CHANNELS = "cadenas"
 	PROGRAMS = "programas"
 	
-class Ranking(Enum):
+class Ranking():
 	POPULAR = "mas-populares.json"
 	MOREVISITED = "mas-vistos.json"
 	RECENT = "audios.json"
